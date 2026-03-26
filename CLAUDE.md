@@ -106,6 +106,13 @@ Dashboard will be available at `http://localhost:5173`
 ✓ Dashboard updates as new sessions are logged
 ✓ Code is clean, documented, and cloneable
 
+## Git Workflow
+
+- **Never commit directly to the `master` branch.** Always create a separate feature branch for each step/phase/task.
+- Create a pull request (PR) to merge the feature branch into `master`.
+- Branch naming: use descriptive names like `phase-1/setup`, `feature/monitor-service`, `fix/db-schema`, etc.
+- **Before starting any new task, always fetch the GitHub issue status** (`gh issue list`) to check what's open, in progress, or completed. Update issues as you progress (add comments, check off tasks, close when done).
+
 ## Important Notes
 
 - **Use `uv` not `pip`** for all Python dependencies
