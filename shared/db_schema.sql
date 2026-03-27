@@ -1,6 +1,9 @@
 -- Claude Code Analyzer - Database Schema
 -- SQLite DDL for sessions.db
 
+-- Enable foreign key enforcement (must be run per connection)
+PRAGMA foreign_keys = ON;
+
 CREATE TABLE IF NOT EXISTS sessions (
   id TEXT PRIMARY KEY,
   start_time DATETIME NOT NULL,
@@ -63,6 +66,15 @@ CREATE TABLE IF NOT EXISTS code_metrics (
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (interaction_id) REFERENCES interactions(id)
 );
+
+-- Trigger: keep updated_at current on sessions row updates
+CREATE TRIGGER IF NOT EXISTS trg_sessions_updated_at
+AFTER UPDATE ON sessions
+FOR EACH ROW
+WHEN OLD.updated_at = NEW.updated_at
+BEGIN
+  UPDATE sessions SET updated_at = CURRENT_TIMESTAMP WHERE id = OLD.id;
+END;
 
 -- Indexes
 CREATE INDEX IF NOT EXISTS idx_sessions_start_time ON sessions(start_time);
