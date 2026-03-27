@@ -1,0 +1,11 @@
+[project]
+name = "claude-code-analyzer-monitor"
+version = "0.1.0"
+description = "Monitor and log Claude Code sessions locally"
+requires-python = ">=3.9"
+
+dependencies = [
+    "sqlalchemy>=2.0.0",
+    "pydantic>=2.0.0",
+    "watchdog>=3.0.0",
+]

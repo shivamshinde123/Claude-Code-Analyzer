@@ -1,0 +1,30 @@
+version: "3.8"
+
+services:
+  monitor:
+    build: ./monitor
+    volumes:
+      - ./data:/app/data
+    environment:
+      - DATABASE_PATH=/app/data/sessions.db
+
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+    environment:
+      - DATABASE_PATH=/app/data/sessions.db
+      - API_PORT=8000
+      - API_HOST=0.0.0.0
+      - FRONTEND_ORIGIN=http://localhost:5173
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost:8000
+    depends_on:
+      - backend
