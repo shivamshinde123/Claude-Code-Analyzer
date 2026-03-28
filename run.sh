@@ -33,6 +33,10 @@ BACKEND_PID=$!
 # 3. Frontend
 echo "[3/3] Starting frontend service (http://localhost:5173)..."
 cd "$ROOT_DIR/frontend"
+if [ ! -d "node_modules" ]; then
+    echo "  Installing frontend dependencies..."
+    npm install --silent
+fi
 npm run dev &
 FRONTEND_PID=$!
 

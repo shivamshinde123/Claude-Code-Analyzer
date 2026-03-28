@@ -12,7 +12,7 @@ from src.db import DatabaseManager
 @pytest.fixture()
 def db():
     """DatabaseManager backed by a temporary SQLite file."""
-    with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmpdir:
+    with tempfile.TemporaryDirectory() as tmpdir:
         db_path = os.path.join(tmpdir, "test.db")
         manager = DatabaseManager(db_path)
         yield manager
