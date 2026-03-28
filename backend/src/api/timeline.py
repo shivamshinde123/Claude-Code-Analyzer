@@ -25,7 +25,7 @@ def _get_qm() -> QueryManager:
 
 
 @router.get("/timeline/session/{session_id}")
-async def get_session_timeline(session_id: str):
+def get_session_timeline(session_id: str):
     """Get interaction-by-interaction timeline for a specific session."""
     timeline = _get_qm().get_session_timeline(session_id)
     if not timeline:
@@ -34,7 +34,7 @@ async def get_session_timeline(session_id: str):
 
 
 @router.get("/timeline/historical")
-async def get_historical_timeline(
+def get_historical_timeline(
     granularity: str = Query("day", description="day, week, or month"),
     language: Optional[str] = Query(None),
     start_date: Optional[str] = Query(None, description="ISO format"),

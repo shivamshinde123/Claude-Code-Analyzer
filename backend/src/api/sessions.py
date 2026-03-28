@@ -8,7 +8,7 @@ from ..db.queries import QueryManager
 
 router = APIRouter(tags=["sessions"])
 
-# Injected at startup via app.state
+# Initialized at startup via init_query_manager
 _qm: Optional[QueryManager] = None
 
 
@@ -24,7 +24,7 @@ def _get_qm() -> QueryManager:
 
 
 @router.get("/sessions")
-async def list_sessions(
+def list_sessions(
     language: Optional[str] = Query(None, description="Filter by programming language"),
     status: Optional[str] = Query(None, description="Filter by status"),
     start_date: Optional[str] = Query(None, description="ISO format start date"),
@@ -53,13 +53,13 @@ async def list_sessions(
 
 
 @router.get("/sessions/stats/summary")
-async def get_session_stats_summary():
+def get_session_stats_summary():
     """Get high-level statistics across all sessions."""
     return _get_qm().get_session_stats()
 
 
 @router.get("/sessions/{session_id}")
-async def get_session_detail(session_id: str):
+def get_session_detail(session_id: str):
     """Get full details for a specific session, including interactions and errors."""
     result = _get_qm().get_session_detail(session_id)
     if result is None:

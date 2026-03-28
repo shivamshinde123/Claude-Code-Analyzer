@@ -401,7 +401,8 @@ class QueryManager:
             for i in interactions:
                 quality_score = None
                 if i.metrics:
-                    quality_score = i.metrics[0].code_quality_score
+                    latest_metric = max(i.metrics, key=lambda m: m.id)
+                    quality_score = latest_metric.code_quality_score
 
                 timeline.append(
                     {

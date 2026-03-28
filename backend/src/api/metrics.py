@@ -30,7 +30,7 @@ def _get_qm() -> QueryManager:
 
 
 @router.get("/metrics/quality")
-async def get_quality_metrics(
+def get_quality_metrics(
     session_id: Optional[str] = Query(None, description="Filter to a specific session"),
 ):
     """Get code quality metrics over time."""
@@ -52,7 +52,7 @@ async def get_quality_metrics(
 
 
 @router.get("/metrics/errors")
-async def get_error_metrics(
+def get_error_metrics(
     session_id: Optional[str] = Query(None),
     error_type: Optional[str] = Query(None),
     language: Optional[str] = Query(None),
@@ -70,7 +70,7 @@ async def get_error_metrics(
 
 
 @router.get("/metrics/acceptance")
-async def get_acceptance_metrics(
+def get_acceptance_metrics(
     language: Optional[str] = Query(None),
     time_period: str = Query("all_time", description="last_7_days, last_30_days, or all_time"),
 ):
