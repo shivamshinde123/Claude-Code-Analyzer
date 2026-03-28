@@ -1,9 +1,27 @@
-import Plot from 'react-plotly.js'
+import Plot from "react-plotly.js"
+
+function themeColor(name, fallback) {
+  if (typeof window === 'undefined') return fallback
+  const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim()
+  return v || fallback
+}
+
+function tint(baseHex, f=0.5){
+  const base = baseHex.replace('#','')
+  const full = base.length===3? base.split('').map((c)=>c+c).join(''): base
+  const r = parseInt(full.slice(0,2),16), g=parseInt(full.slice(2,4),16), b=parseInt(full.slice(4,6),16)
+  const rr = Math.round(r + (255-r)*f)
+  const gg = Math.round(g + (255-g)*f)
+  const bb = Math.round(b + (255-b)*f)
+  return `rgb(${rr}, ${gg}, ${bb})`
+}
 
 function ScatterPlot({ data, xKey, yKey, sizeKey, title }) {
   if (!data || data.length === 0) {
     return <div className="chart-placeholder">No scatter data available</div>
   }
+
+  const ACCENT = themeColor('--accent', '#C084FC')
 
   // Convert duration to minutes for consistent display
   const toMinutes = xKey === 'duration_seconds'
@@ -23,14 +41,12 @@ function ScatterPlot({ data, xKey, yKey, sizeKey, title }) {
       `Errors: ${d.error_count || 0}`
   )
 
-  // Color by language
+  // Color all points with accent tints by language (max 6 variants)
   const languages = [...new Set(data.map((d) => d.language))]
+  const palette = [0.1,0.25,0.4,0.55,0.7,0.85].map((f)=>tint(ACCENT,f))
   const colorMap = {}
-  const palette = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#06B6D4']
-  languages.forEach((lang, i) => {
-    colorMap[lang] = palette[i % palette.length]
-  })
-  const colors = data.map((d) => colorMap[d.language] || '#6B7280')
+  languages.forEach((lang, i) => { colorMap[lang] = palette[i % palette.length] })
+  const colors = data.map((d) => colorMap[d.language] || ACCENT)
 
   const xLabel = toMinutes ? 'Duration (minutes)' : xKey
   const yLabel = yKey === 'interaction_count' ? 'Interactions' : yKey
@@ -46,8 +62,8 @@ function ScatterPlot({ data, xKey, yKey, sizeKey, title }) {
           marker: {
             size: sizeValues,
             color: colors,
-            opacity: 0.7,
-            line: { width: 1, color: '#fff' },
+            opacity: 0.8,
+            line: { width: 1, color: '#0b0f16' },
           },
           text: hoverText,
           hoverinfo: 'text',
@@ -55,12 +71,13 @@ function ScatterPlot({ data, xKey, yKey, sizeKey, title }) {
       ]}
       layout={{
         title: { text: title, font: { size: 14 } },
-        xaxis: { title: xLabel },
-        yaxis: { title: yLabel },
+        xaxis: { title: xLabel, gridcolor: '#1f2636', color: '#A5A7BE' },
+        yaxis: { title: yLabel, gridcolor: '#1f2636', color: '#A5A7BE' },
         margin: { b: 60, l: 60, r: 30, t: 40 },
         paper_bgcolor: 'transparent',
         plot_bgcolor: 'transparent',
         hovermode: 'closest',
+        font: { color: '#E6E7F0' },
       }}
       useResizeHandler
       style={{ width: '100%', height: '100%' }}

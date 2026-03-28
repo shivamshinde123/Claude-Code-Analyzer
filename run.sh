@@ -26,7 +26,7 @@ echo ""
 # 1. Monitor
 echo "[1/3] Starting monitor service..."
 cd "$ROOT_DIR/monitor"
-uv run python src/main.py &
+uv run python -m src.main &
 MONITOR_PID=$!
 
 # 2. Backend
@@ -54,3 +54,4 @@ echo ""
 echo "Press Ctrl+C to stop all services."
 
 wait
+

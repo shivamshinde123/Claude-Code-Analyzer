@@ -117,3 +117,47 @@ claude-code-analyzer/
 ## License
 
 MIT
+
+## Demo Data (Seeding)
+
+Want to see charts right away? Seed the SQLite DB with realistic demo data.
+
+1) Stop running services first
+   - If you started with `run.ps1`/`run.sh`, press Ctrl+C and wait for “All services stopped.”
+   - This releases `data/sessions.db` so the seeder can write (avoids WinError 32 on Windows).
+
+2) Seed demo data
+
+- Windows (PowerShell):
+```powershell
+cd monitor
+uv sync
+uv run python -m src.seed --reset --sessions 20
+```
+
+- macOS/Linux:
+```bash
+cd monitor
+uv sync
+uv run python -m src.seed --reset --sessions 20
+```
+
+Options:
+- Omit `--reset` to append more data instead of recreating the DB.
+- Control volume with `--sessions N --min-interactions 1 --max-interactions 6`.
+
+3) Start the app
+- Windows: `./run.ps1`
+- macOS/Linux: `./run.sh`
+- Frontend: http://localhost:5173  ·  Backend: http://localhost:8000
+
+Docker users (optional):
+```bash
+docker compose run --rm monitor uv run python -m src.seed --reset --sessions 20
+# then
+docker compose up --build
+```
+
+Troubleshooting:
+- “PermissionError: file in use”: ensure backend/monitor are stopped and no DB browser has `data/sessions.db` open.
+- Use a custom DB path: `uv run python -m src.seed --db-path ..\data\sessions_demo.db` and set `DATABASE_PATH` for the backend accordingly.

@@ -9,20 +9,26 @@ Write-Host ""
 
 # 1. Monitor
 Write-Host "[1/3] Starting monitor service..." -ForegroundColor Green
-$monitor = Start-Process -NoNewWindow -PassThru -FilePath "uv" `
-    -ArgumentList "run python src/main.py" `
+$monitor = Start-Process -NoNewWindow -PassThru -FilePath "cmd.exe" `
+    -ArgumentList "/c uv run python -m src.main" `
     -WorkingDirectory "$RootDir\monitor"
 
 # 2. Backend
 Write-Host "[2/3] Starting backend service (http://localhost:8000)..." -ForegroundColor Green
-$backend = Start-Process -NoNewWindow -PassThru -FilePath "uv" `
-    -ArgumentList "run uvicorn src.main:app --host 127.0.0.1 --port 8000" `
+$backend = Start-Process -NoNewWindow -PassThru -FilePath "cmd.exe" `
+    -ArgumentList "/c uv run uvicorn src.main:app --host 127.0.0.1 --port 8000" `
     -WorkingDirectory "$RootDir\backend"
 
 # 3. Frontend
 Write-Host "[3/3] Starting frontend service (http://localhost:5173)..." -ForegroundColor Green
-$frontend = Start-Process -NoNewWindow -PassThru -FilePath "npm" `
-    -ArgumentList "run dev" `
+if (-not (Test-Path "$RootDir\frontend\node_modules")) {
+    Write-Host "  Installing frontend dependencies..." -ForegroundColor Gray
+    Start-Process -NoNewWindow -Wait -FilePath "cmd.exe" `
+        -ArgumentList "/c npm install --silent" `
+        -WorkingDirectory "$RootDir\frontend"
+}
+$frontend = Start-Process -NoNewWindow -PassThru -FilePath "cmd.exe" `
+    -ArgumentList "/c npm run dev" `
     -WorkingDirectory "$RootDir\frontend"
 
 Write-Host ""
@@ -42,3 +48,4 @@ try {
     }
     Write-Host "All services stopped."
 }
+
