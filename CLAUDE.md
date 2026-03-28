@@ -37,10 +37,10 @@ claude-code-analyzer/
 
 - [x] Architecture designed
 - [x] Database schema finalized
-- [ ] Phase 1: Setup (folder structure, configs)
-- [ ] Phase 2: Monitor service
-- [ ] Phase 3: Backend service
-- [ ] Phase 4: Frontend service
+- [x] Phase 1: Setup (folder structure, configs)
+- [x] Phase 2: Monitor service
+- [x] Phase 3: Backend service
+- [x] Phase 4: Frontend service
 - [ ] Phase 5: Integration & Polish
 
 ## Key Technologies

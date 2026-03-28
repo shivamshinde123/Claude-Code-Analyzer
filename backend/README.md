@@ -39,6 +39,15 @@ Swagger UI: http://localhost:8000/docs
 | GET | `/api/timeline/session/{id}` | Session timeline |
 | GET | `/api/timeline/historical` | Historical trends |
 
+## Tests
+
+```bash
+uv sync --dev
+uv run pytest tests/ -v
+```
+
+52 tests covering aggregation utilities, database queries, and API endpoints.
+
 ## Configuration
 
 | Variable | Default | Description |

@@ -24,6 +24,15 @@ uv run python src/main.py
 | `SESSION_TIMEOUT_SECONDS` | `300` | Inactivity timeout |
 | `LOG_LEVEL` | `INFO` | Python logging level |
 
+## Tests
+
+```bash
+uv sync --dev
+uv run pytest tests/ -v
+```
+
+40 tests covering utility functions and database operations.
+
 ## CLI Fallback
 
 For testing without actual Claude Code:

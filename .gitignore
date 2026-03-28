@@ -5,6 +5,7 @@ __pycache__/
 dist/
 .venv/
 .env
+.pytest_cache/
 
 # Node
 node_modules/
