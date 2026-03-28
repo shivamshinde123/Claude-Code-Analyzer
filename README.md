@@ -56,6 +56,18 @@ cd monitor && uv sync && uv run python -m src.main
 > ```bash
 > uv run python -m src.main --import-history
 > ```
+>
+> The history import fully enriches each session so all four dashboard charts are populated:
+> - **Duration & end time** — computed from the first and last message timestamps.
+> - **Code quality metrics** — cyclomatic complexity, nesting depth, type hints, and quality
+>   score are computed for every Python / JavaScript / TypeScript response and stored in the
+>   `code_metrics` table, feeding the *Code Quality Over Time* chart.
+> - **Error records** — error patterns (tracebacks, syntax errors, JS exceptions, etc.) are
+>   extracted from every conversation turn and stored in the `errors` table, feeding the
+>   *Error Distribution* chart.
+> - **Acceptance rate** — a follow-up heuristic detects correction/rejection phrases in the
+>   next prompt (e.g. "try again", "that's wrong", "revert") and sets `was_accepted`
+>   accordingly, giving the *Acceptance Rate* chart real signal to work with.
 
 **Backend** (API server — http://localhost:8000):
 ```bash
