@@ -103,7 +103,7 @@ def compute_code_metrics(code: str, language: str) -> Dict:
     }
 
     # Lines of code (non-blank, non-comment)
-    lines = [l for l in code.splitlines() if l.strip() and not l.strip().startswith("#")]
+    lines = [line for line in code.splitlines() if line.strip() and not line.strip().startswith("#")]
     metrics["lines_of_code"] = len(lines)
 
     if language == "python":
