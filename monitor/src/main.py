@@ -90,6 +90,16 @@ def parse_args() -> argparse.Namespace:
             "(duplicate sessions may appear if the file has not changed between runs)."
         ),
     )
+    parser.add_argument(
+        "--no-import-history",
+        action="store_true",
+        default=False,
+        help=(
+            "Skip the automatic history import that normally runs before starting "
+            "the live watcher. Useful if you want a faster startup or have already "
+            "imported history manually."
+        ),
+    )
 
     return parser.parse_args()
 
@@ -300,6 +310,9 @@ def main() -> None:
     elif args.import_history:
         import_history(db)
     else:
+        if not args.no_import_history:
+            print("Auto-importing history before starting watcher...")
+            import_history(db)
         run_watcher(db, args)
 
 
