@@ -32,7 +32,7 @@ _ERROR_PATTERNS: List[Tuple[str, str, str]] = [
     (r"\bIndexError\b", "IndexError", "warning"),
     # JavaScript / TypeScript
     (r"\bReferenceError\b", "ReferenceError", "warning"),
-    (r"Cannot read propert(?:y|ies) of", "TypeError", "warning"),
+    (r"Cannot read propert(?:y|ies) of", "TypeError", "warning"),  # JS: Cannot read property/properties of null/undefined
     (r"is not a function", "TypeError", "warning"),
     (r"is not defined", "ReferenceError", "warning"),
     # General
