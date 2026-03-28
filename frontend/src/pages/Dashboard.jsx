@@ -8,15 +8,43 @@ import InsightsPanel from '../components/InsightsPanel'
 import { useSessions } from '../hooks/useSessions'
 import { useMetrics } from '../hooks/useMetrics'
 
+const TIME_RANGES = [
+  { label: 'All Time', value: 'all_time', days: null },
+  { label: 'Last 30 Days', value: 'last_30_days', days: 30 },
+  { label: 'Last 60 Days', value: 'last_60_days', days: 60 },
+  { label: 'Last 90 Days', value: 'last_90_days', days: 90 },
+]
+
+function getStartDate(days) {
+  if (!days) return null
+  const d = new Date()
+  d.setDate(d.getDate() - days)
+  return d.toISOString()
+}
+
 function Dashboard() {
   const [filters, setFilters] = useState({
     language: null,
+    timePeriod: 'all_time',
   })
 
-  const { sessions, loading: sessionsLoading, error: sessionsError } = useSessions(filters)
+  const sessionsFilters = useMemo(() => {
+    const range = TIME_RANGES.find((r) => r.value === filters.timePeriod)
+    return {
+      language: filters.language,
+      startDate: getStartDate(range?.days ?? null),
+    }
+  }, [filters.language, filters.timePeriod])
+
+  const { sessions, loading: sessionsLoading, error: sessionsError } = useSessions(sessionsFilters)
   const { metrics, loading: metricsLoading, error: metricsError } = useMetrics(filters)
+
   const handleLanguageChange = (language) => {
     setFilters((prev) => ({ ...prev, language }))
+  }
+
+  const handleTimePeriodChange = (timePeriod) => {
+    setFilters((prev) => ({ ...prev, timePeriod }))
   }
 
   const kpis = useMemo(() => {
@@ -99,6 +127,20 @@ function Dashboard() {
         <h3>Filters</h3>
         <div className="filters-row">
           <LanguageFilter onLanguageChange={handleLanguageChange} />
+          <div className="time-range-filter">
+            <label>Time Range</label>
+            <div className="time-range-buttons">
+              {TIME_RANGES.map((range) => (
+                <button
+                  key={range.value}
+                  className={`time-range-btn${filters.timePeriod === range.value ? ' active' : ''}`}
+                  onClick={() => handleTimePeriodChange(range.value)}
+                >
+                  {range.label}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
 
