@@ -32,8 +32,8 @@ function LanguageFilter({ onLanguageChange }) {
 
   return (
     <div className="language-filter">
-      <label htmlFor="language-select">Language</label>
-      <select id="language-select" value={selected} onChange={handleChange} aria-label="Filter by language">
+      <label>Language</label>
+      <select value={selected} onChange={handleChange}>
         <option value="">All Languages</option>
         {languages.map((lang) => (
           <option key={lang} value={lang}>
