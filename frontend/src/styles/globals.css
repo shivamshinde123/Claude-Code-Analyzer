@@ -1,4 +1,4 @@
-/* Dark Theme — Claude Code Analyzer */
+/* Dark Theme ï¿½ Claude Code Analyzer */
 * {
   margin: 0;
   padding: 0;
@@ -99,9 +99,14 @@ body {
 .filters-panel { padding: 20px; margin-bottom: 24px; }
 .filters-panel h3 { font-size: 13px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 12px; }
 .filters-row { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-end; }
-.language-filter label, .date-range-filter label, .status-filter label { font-size: 13px; font-weight: 600; color: var(--text-secondary); }
+.language-filter label, .date-range-filter label, .status-filter label, .time-range-filter label { font-size: 13px; font-weight: 600; color: var(--text-secondary); }
 .language-filter select, .status-filter select, .date-range-filter input { background: #0f1521; color: var(--text-primary); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 10px; outline: none; transition: border-color .15s, box-shadow .15s; }
 .language-filter select:focus, .status-filter select:focus, .date-range-filter input:focus { border-color: var(--accent-strong); box-shadow: 0 0 0 3px rgba(139,92,246,0.25); }
+.time-range-filter { display: flex; flex-direction: column; gap: 6px; }
+.time-range-buttons { display: flex; gap: 6px; flex-wrap: wrap; }
+.time-range-btn { background: #0f1521; color: var(--text-secondary); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 7px 14px; font-size: 13px; font-weight: 500; cursor: pointer; transition: background .15s, border-color .15s, color .15s; }
+.time-range-btn:hover { border-color: var(--accent-strong); color: var(--text-primary); }
+.time-range-btn.active { background: rgba(139,92,246,0.2); border-color: var(--accent-strong); color: var(--accent); font-weight: 600; }
 
 /* Charts */
 .charts-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 16px; }

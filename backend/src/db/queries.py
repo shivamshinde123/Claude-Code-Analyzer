@@ -233,8 +233,9 @@ class QueryManager:
     def get_quality_metrics(
         self,
         session_id: Optional[str] = None,
+        start_date: Optional[str] = None,
     ) -> List[Dict]:
-        """Return code quality metrics, optionally scoped to a session."""
+        """Return code quality metrics, optionally scoped to a session or date range."""
         with self._session_factory() as db:
             query = (
                 select(CodeMetricsModel, InteractionModel.timestamp)
@@ -246,6 +247,10 @@ class QueryManager:
 
             if session_id:
                 query = query.where(InteractionModel.session_id == session_id)
+            if start_date:
+                query = query.where(
+                    InteractionModel.timestamp >= datetime.fromisoformat(start_date)
+                )
 
             query = query.order_by(InteractionModel.timestamp)
             rows = db.execute(query).all()
@@ -270,6 +275,7 @@ class QueryManager:
         session_id: Optional[str] = None,
         error_type: Optional[str] = None,
         language: Optional[str] = None,
+        start_date: Optional[str] = None,
     ) -> List[Dict]:
         """Return errors with optional filters, as list of dicts."""
         with self._session_factory() as db:
@@ -281,6 +287,10 @@ class QueryManager:
                 query = query.where(ErrorModel.error_type == error_type)
             if language:
                 query = query.where(ErrorModel.language == language)
+            if start_date:
+                query = query.where(
+                    ErrorModel.timestamp >= datetime.fromisoformat(start_date)
+                )
 
             query = query.order_by(ErrorModel.timestamp)
             errors = db.execute(query).scalars().all()
@@ -322,6 +332,12 @@ class QueryManager:
                 query = query.where(InteractionModel.timestamp >= cutoff)
             elif time_period == "last_30_days":
                 cutoff = datetime.now(timezone.utc) - timedelta(days=30)
+                query = query.where(InteractionModel.timestamp >= cutoff)
+            elif time_period == "last_60_days":
+                cutoff = datetime.now(timezone.utc) - timedelta(days=60)
+                query = query.where(InteractionModel.timestamp >= cutoff)
+            elif time_period == "last_90_days":
+                cutoff = datetime.now(timezone.utc) - timedelta(days=90)
                 query = query.where(InteractionModel.timestamp >= cutoff)
 
             rows = db.execute(query).all()

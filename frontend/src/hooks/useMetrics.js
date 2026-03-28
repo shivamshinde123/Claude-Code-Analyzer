@@ -18,8 +18,10 @@ export function useMetrics(filters) {
 
     const errorParams = {}
     if (filters.language) errorParams.language = filters.language
+    if (filters.timePeriod) errorParams.time_period = filters.timePeriod
 
     const qualityParams = {}
+    if (filters.timePeriod) qualityParams.time_period = filters.timePeriod
 
     Promise.all([
       apiClient.get('/api/metrics/acceptance', { params: acceptanceParams, signal }),
