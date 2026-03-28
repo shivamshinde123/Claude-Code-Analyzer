@@ -8,8 +8,16 @@ import sys
 import time
 
 from .db import DatabaseManager
-from .detector import SessionDetector
+from .detector import SessionDetector, _default_watch_paths
 from .logger import SessionLogger
+from .reader import ConversationFileReader
+from .utils import (
+    classify_interaction,
+    compute_code_metrics,
+    detect_language_from_code,
+    detect_project_language,
+    estimate_tokens,
+)
 
 DEFAULT_DB_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "data", "sessions.db")
 
@@ -72,6 +80,15 @@ def parse_args() -> argparse.Namespace:
         "--test-session",
         action="store_true",
         help="Log a complete test session with sample data",
+    )
+    parser.add_argument(
+        "--import-history",
+        action="store_true",
+        help=(
+            "Read all existing Claude Code JSONL files and import them as completed "
+            "sessions into the database.  Safe to run multiple times on the same DB "
+            "(duplicate sessions may appear if the file has not changed between runs)."
+        ),
     )
 
     return parser.parse_args()
@@ -145,6 +162,95 @@ def log_test_session(db: DatabaseManager) -> None:
     print(f"Test session logged with {len(test_interactions)} interactions.")
 
 
+def import_history(db: DatabaseManager) -> None:
+    """Import all existing Claude Code JSONL conversations into the database.
+
+    Scans the default Claude Code watch paths for ``*.jsonl`` files, parses
+    each one from the beginning, and writes completed sessions + interactions
+    into the database.  Useful for populating the dashboard with past activity
+    without running the live watcher.
+    """
+    watch_paths = _default_watch_paths()
+    if not watch_paths:
+        print("No Claude Code directories found. Is Claude Code installed?")
+        return
+
+    reader = ConversationFileReader()
+    sessions_imported = 0
+    interactions_imported = 0
+
+    for watch_path in watch_paths:
+        for root, _dirs, files in os.walk(watch_path):
+            for fname in sorted(files):
+                if not fname.endswith(".jsonl"):
+                    continue
+
+                file_path = os.path.join(root, fname)
+                turns = reader.read_all_turns(file_path)
+                if not turns:
+                    continue
+
+                first_turn = turns[0]
+                last_turn = turns[-1]
+                cwd = first_turn.cwd
+
+                # Determine language: project config first, then code-fence scan
+                language = detect_project_language(cwd)
+                if language == "unknown":
+                    for t in turns:
+                        lang = detect_language_from_code(t.claude_response)
+                        if lang != "unknown":
+                            language = lang
+                            break
+
+                session_id = db.create_session(
+                    language=language,
+                    start_time=first_turn.timestamp,
+                    status="completed",
+                    project_name=first_turn.project_name,
+                    file_path=cwd,
+                )
+                sessions_imported += 1
+
+                for i, turn in enumerate(turns):
+                    tokens = turn.tokens_used or estimate_tokens(
+                        turn.human_prompt + turn.claude_response
+                    )
+                    interaction_id = db.add_interaction(
+                        session_id=session_id,
+                        sequence_number=i + 1,
+                        timestamp=turn.timestamp,
+                        human_prompt=turn.human_prompt,
+                        claude_response=turn.claude_response,
+                        was_accepted=True,
+                        was_modified=(i > 0),
+                        interaction_type=classify_interaction(turn.claude_response),
+                        tokens_used=tokens,
+                    )
+
+                    if language in ("python", "javascript", "typescript"):
+                        metrics = compute_code_metrics(turn.claude_response, language)
+                        db.add_code_metrics(
+                            interaction_id=interaction_id,
+                            language=language,
+                            **metrics,
+                        )
+
+                    interactions_imported += 1
+
+                db.end_session(
+                    session_id=session_id,
+                    end_time=last_turn.timestamp,
+                    acceptance_rate=1.0,
+                    status="completed",
+                )
+
+    print(
+        f"History import complete: {sessions_imported} session(s), "
+        f"{interactions_imported} interaction(s)."
+    )
+
+
 def run_watcher(db: DatabaseManager, args: argparse.Namespace) -> None:
     """Run the file system watcher continuously."""
     # Append --watch-dir to defaults rather than replacing them
@@ -191,6 +297,8 @@ def main() -> None:
         log_single_interaction(db, prompt, response, args.language)
     elif args.test_session:
         log_test_session(db)
+    elif args.import_history:
+        import_history(db)
     else:
         run_watcher(db, args)
 

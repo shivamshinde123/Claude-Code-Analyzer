@@ -3,6 +3,7 @@
 import ast
 import os
 import re
+from collections import Counter
 from typing import Dict, Optional, Tuple
 
 # Extension → language mapping
@@ -255,6 +256,77 @@ def classify_interaction(code_response: str) -> str:
         return "new_code"
 
     return "refactor"
+
+
+def detect_project_language(cwd: str) -> str:
+    """Guess the primary programming language of a project from its root directory.
+
+    Checks for well-known config/manifest files first (most reliable), then
+    falls back to counting source-file extensions at the top level.
+    Returns one of the language values in :data:`LANGUAGE_EXTENSIONS`, or
+    ``"unknown"`` when detection fails.
+    """
+    if not cwd or not os.path.isdir(cwd):
+        return "unknown"
+
+    try:
+        entries = set(os.listdir(cwd))
+    except OSError:
+        return "unknown"
+
+    # Config/manifest files are definitive
+    if entries & {"pyproject.toml", "setup.py", "setup.cfg", "requirements.txt"}:
+        return "python"
+    if "go.mod" in entries:
+        return "go"
+    if "Cargo.toml" in entries:
+        return "rust"
+    if entries & {"pom.xml", "build.gradle", "build.gradle.kts"}:
+        return "java"
+    if "Gemfile" in entries:
+        return "ruby"
+    if "composer.json" in entries:
+        return "php"
+    if "Package.swift" in entries:
+        return "swift"
+    if "build.gradle.kts" in entries or any(e.endswith(".kt") for e in entries):
+        return "kotlin"
+    if "package.json" in entries:
+        return "typescript" if "tsconfig.json" in entries else "javascript"
+
+    # Count source files by extension as a last resort
+    counts: Counter = Counter()
+    for entry in entries:
+        ext = os.path.splitext(entry)[1].lower()
+        lang = LANGUAGE_EXTENSIONS.get(ext)
+        if lang:
+            counts[lang] += 1
+    return counts.most_common(1)[0][0] if counts else "unknown"
+
+
+def detect_language_from_code(text: str) -> str:
+    """Detect the most likely programming language from markdown code fences.
+
+    Scans for fenced code blocks (```language) in *text* and returns the
+    most frequently occurring language identifier that is present in
+    :data:`LANGUAGE_EXTENSIONS`.  Returns ``"unknown"`` if nothing is found.
+    """
+    _known = set(LANGUAGE_EXTENSIONS.values())
+    # Also accept common fence aliases that aren't file extensions
+    _aliases: Dict[str, str] = {"py": "python", "js": "javascript", "ts": "typescript"}
+
+    matches = re.findall(r"```(\w+)", text)
+    if not matches:
+        return "unknown"
+
+    counts: Counter = Counter()
+    for raw in matches:
+        lang = raw.lower()
+        lang = _aliases.get(lang, lang)
+        if lang in _known:
+            counts[lang] += 1
+
+    return counts.most_common(1)[0][0] if counts else "unknown"
 
 
 def parse_error_message(error_text: str) -> Tuple[str, str]:

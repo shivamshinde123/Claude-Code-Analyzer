@@ -64,6 +64,10 @@ class SessionLogger:
         timestamp = self._to_datetime(data.get("timestamp"))
         tokens = data.get("tokens") or estimate_tokens(human_prompt + claude_response)
 
+        # Allow the detector to supply a per-interaction language; fall back to
+        # the session-level language set at session_started time.
+        interaction_language = data.get("language") or self._current_language
+
         # Classify and detect modification
         interaction_type = classify_interaction(claude_response)
         was_modified = self._detect_modification(claude_response)
@@ -83,11 +87,11 @@ class SessionLogger:
         )
 
         # Compute code metrics for supported languages
-        if self._current_language in ("python", "javascript", "typescript"):
-            metrics = compute_code_metrics(claude_response, self._current_language)
+        if interaction_language in ("python", "javascript", "typescript"):
+            metrics = compute_code_metrics(claude_response, interaction_language)
             self._db.add_code_metrics(
                 interaction_id=interaction_id,
-                language=self._current_language,
+                language=interaction_language,
                 **metrics,
             )
 
