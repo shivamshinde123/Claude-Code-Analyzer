@@ -8,6 +8,7 @@ import InsightsPanel from '../components/InsightsPanel'
 import { useSessions } from '../hooks/useSessions'
 import { useMetrics } from '../hooks/useMetrics'
 
+/** Available time-range options shown as filter buttons. */
 const TIME_RANGES = [
   { label: 'All Time', value: 'all_time', days: null },
   { label: 'Last 30 Days', value: 'last_30_days', days: 30 },
@@ -15,6 +16,13 @@ const TIME_RANGES = [
   { label: 'Last 90 Days', value: 'last_90_days', days: 90 },
 ]
 
+/**
+ * Return an ISO timestamp for *days* ago, or null when *days* is falsy.
+ * Used to derive the `startDate` filter value from a time-range selection.
+ *
+ * @param {number|null} days
+ * @returns {string|null}
+ */
 function getStartDate(days) {
   if (!days) return null
   const d = new Date()
@@ -22,6 +30,17 @@ function getStartDate(days) {
   return d.toISOString()
 }
 
+/**
+ * Main analytics dashboard page.
+ *
+ * Displays four KPI cards, a filter panel, four charts (acceptance-rate
+ * timeline, error distribution bar chart, duration vs interactions scatter
+ * plot, and code-quality timeline), and an insights panel.  All data is
+ * loaded via the `useSessions` and `useMetrics` hooks and re-fetched when the
+ * language or time-period filter changes.
+ *
+ * @returns {JSX.Element}
+ */
 function Dashboard() {
   const [filters, setFilters] = useState({
     language: null,

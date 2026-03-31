@@ -55,6 +55,12 @@ def _language_extension(language: str) -> str:
 
 
 def setup_logging(level: str = "INFO") -> None:
+    """Configure the root logger with a timestamped format.
+
+    Args:
+        level: A logging level name (e.g. ``"DEBUG"``, ``"INFO"``).
+               Defaults to ``"INFO"``.
+    """
     logging.basicConfig(
         level=getattr(logging, level.upper(), logging.INFO),
         format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
@@ -63,6 +69,18 @@ def setup_logging(level: str = "INFO") -> None:
 
 
 def parse_args() -> argparse.Namespace:
+    """Parse and return command-line arguments for the monitor service.
+
+    The parser supports:
+    - ``--db-path``          path to the SQLite database
+    - ``--watch-dir``        extra directory to monitor
+    - ``--timeout``          session inactivity timeout in seconds
+    - ``--log-level``        Python logging level
+    - ``--log-interaction``  manually log a single prompt/response pair (for testing)
+    - ``--language``         language hint for ``--log-interaction``
+    - ``--import-history``   import all existing JSONL files and exit
+    - ``--no-import-history`` skip the automatic history import before watching
+    """
     parser = argparse.ArgumentParser(description="Claude Code Analyzer - Monitor Service")
     parser.add_argument(
         "--db-path",
@@ -304,6 +322,19 @@ def run_watcher(db: DatabaseManager, args: argparse.Namespace) -> None:
 
 
 def main() -> None:
+    """Entry point for the monitor service.
+
+    Parses CLI arguments, initialises the database, then dispatches to one of
+    three modes:
+
+    1. **Manual interaction** (``--log-interaction``): logs a single
+       prompt/response pair directly to the database without starting the
+       watcher — useful for smoke-testing the pipeline.
+    2. **History import** (``--import-history``): bulk-imports all existing
+       JSONL files and exits.
+    3. **Live watcher** (default): optionally imports history first, then
+       starts the watchdog observer loop.
+    """
     args = parse_args()
     setup_logging(args.log_level)
     db_path = os.path.abspath(args.db_path)

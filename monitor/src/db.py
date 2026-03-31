@@ -27,10 +27,12 @@ from sqlalchemy.orm import (
 
 
 def _utcnow() -> datetime:
+    """Return the current UTC datetime (used as a column default)."""
     return datetime.now(timezone.utc)
 
 
 def _new_uuid() -> str:
+    """Generate a new random UUID string (used as a primary-key default)."""
     return str(uuid.uuid4())
 
 
@@ -38,10 +40,16 @@ def _new_uuid() -> str:
 
 
 class Base(DeclarativeBase):
-    pass
+    """Declarative base shared by all ORM models in the monitor service."""
 
 
 class SessionModel(Base):
+    """ORM model representing a single Claude Code coding session.
+
+    A session begins when the monitor detects the first interaction in a new
+    JSONL file and ends either on timeout or when the watcher is stopped.
+    """
+
     __tablename__ = "sessions"
 
     id = Column(String, primary_key=True, default=_new_uuid)
@@ -68,6 +76,12 @@ class SessionModel(Base):
 
 
 class InteractionModel(Base):
+    """ORM model representing one human→Claude exchange within a session.
+
+    Stores the raw prompt and response text alongside computed metrics such
+    as token count, interaction type classification, and acceptance status.
+    """
+
     __tablename__ = "interactions"
 
     id = Column(String, primary_key=True, default=_new_uuid)
@@ -96,6 +110,12 @@ class InteractionModel(Base):
 
 
 class ErrorModel(Base):
+    """ORM model for an error pattern detected in a conversation turn.
+
+    Errors are extracted from both the human prompt (e.g. a paste of a
+    traceback) and the Claude response using compiled regex patterns.
+    """
+
     __tablename__ = "errors"
 
     id = Column(String, primary_key=True, default=_new_uuid)
@@ -121,6 +141,12 @@ class ErrorModel(Base):
 
 
 class CodeMetricsModel(Base):
+    """ORM model for static-analysis metrics extracted from a code response.
+
+    Metrics are computed for Python, JavaScript, and TypeScript responses only.
+    Each row is linked to the interaction whose Claude response was analysed.
+    """
+
     __tablename__ = "code_metrics"
 
     id = Column(String, primary_key=True, default=_new_uuid)
@@ -146,9 +172,21 @@ class CodeMetricsModel(Base):
 
 
 class DatabaseManager:
-    """Handles all database CRUD operations."""
+    """Handles all database CRUD operations for the monitor service.
+
+    Uses SQLAlchemy as an ORM layer over a local SQLite file.  All public
+    methods open a short-lived session, commit, and close — making them safe
+    to call from multiple threads (watchdog runs file-event callbacks on a
+    background thread).
+    """
 
     def __init__(self, db_path: str):
+        """Initialise the database at *db_path*, creating tables if absent.
+
+        Args:
+            db_path: Absolute or relative path to the SQLite file.  Parent
+                     directories are created automatically.
+        """
         os.makedirs(os.path.dirname(os.path.abspath(db_path)), exist_ok=True)
         self.engine = create_engine(f"sqlite:///{db_path}", echo=False)
 

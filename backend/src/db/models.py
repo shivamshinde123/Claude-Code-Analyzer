@@ -28,18 +28,25 @@ from sqlalchemy.orm import (
 
 
 def _utcnow() -> datetime:
+    """Return the current UTC datetime (used as a column default)."""
     return datetime.now(timezone.utc)
 
 
 def _new_uuid() -> str:
+    """Generate a new random UUID string (used as a primary-key default)."""
     return str(uuid.uuid4())
 
 
 class Base(DeclarativeBase):
-    pass
+    """Declarative base shared by all ORM models in the backend service."""
 
 
 class SessionModel(Base):
+    """ORM model for a Claude Code session, mirroring the monitor service model.
+
+    Read-only from the backend's perspective; rows are written by the monitor.
+    """
+
     __tablename__ = "sessions"
 
     id = Column(String, primary_key=True, default=_new_uuid)
@@ -66,6 +73,8 @@ class SessionModel(Base):
 
 
 class InteractionModel(Base):
+    """ORM model for a single human→Claude exchange within a session."""
+
     __tablename__ = "interactions"
 
     id = Column(String, primary_key=True, default=_new_uuid)
@@ -94,6 +103,8 @@ class InteractionModel(Base):
 
 
 class ErrorModel(Base):
+    """ORM model for an error pattern detected inside a conversation turn."""
+
     __tablename__ = "errors"
 
     id = Column(String, primary_key=True, default=_new_uuid)
@@ -119,6 +130,8 @@ class ErrorModel(Base):
 
 
 class CodeMetricsModel(Base):
+    """ORM model for static-analysis metrics derived from a code response."""
+
     __tablename__ = "code_metrics"
 
     id = Column(String, primary_key=True, default=_new_uuid)

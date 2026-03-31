@@ -1,5 +1,13 @@
 import React from 'react'
 
+/**
+ * Top-level error boundary that catches unhandled render errors.
+ *
+ * When any descendant component throws during rendering, this boundary
+ * replaces the broken subtree with a simple error card and logs the full
+ * error + component stack to the console.  A "Reload Page" button lets the
+ * user recover without a manual browser refresh.
+ */
 class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props)

@@ -13,11 +13,17 @@ _qm: Optional[QueryManager] = None
 
 
 def init_query_manager(qm: QueryManager) -> None:
+    """Wire the shared :class:`QueryManager` into this router module.
+
+    Called once at application startup from ``main.py`` so all endpoint
+    handlers share the same database session factory.
+    """
     global _qm
     _qm = qm
 
 
 def _get_qm() -> QueryManager:
+    """Return the module-level QueryManager, raising if not yet initialised."""
     if _qm is None:
         raise RuntimeError("QueryManager not initialized")
     return _qm

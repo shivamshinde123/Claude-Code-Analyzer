@@ -1,11 +1,25 @@
 import Plot from "react-plotly.js"
 
+/**
+ * Read a CSS custom property value from the document root.
+ *
+ * @param {string} name     - CSS variable name, e.g. `'--accent'`.
+ * @param {string} fallback - Value returned when the variable is undefined.
+ * @returns {string}
+ */
 function themeColor(name, fallback) {
   if (typeof window === 'undefined') return fallback
   const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim()
   return v || fallback
 }
 
+/**
+ * Return a single tint of *baseHex* blended towards white by factor *f*.
+ *
+ * @param {string} baseHex - Source hex colour.
+ * @param {number} f       - Tint factor between 0 (original) and 1 (white).
+ * @returns {string} CSS `rgb()` colour string.
+ */
 function tint(baseHex, f=0.5){
   const base = baseHex.replace('#','')
   const full = base.length===3? base.split('').map((c)=>c+c).join(''): base
@@ -16,6 +30,24 @@ function tint(baseHex, f=0.5){
   return `rgb(${rr}, ${gg}, ${bb})`
 }
 
+/**
+ * Scatter plot that visualises sessions as points on an X/Y plane.
+ *
+ * - X axis: duration in minutes (when `xKey === 'duration_seconds'`) or the
+ *   raw numeric field.
+ * - Y axis: the value of `yKey` (e.g. `interaction_count`).
+ * - Marker size: scaled from the optional `sizeKey` field (e.g. `error_count`).
+ * - Marker colour: one accent tint per unique language.
+ *
+ * @param {{
+ *   data: object[],
+ *   xKey: string,
+ *   yKey: string,
+ *   sizeKey?: string,
+ *   title: string
+ * }} props
+ * @returns {JSX.Element}
+ */
 function ScatterPlot({ data, xKey, yKey, sizeKey, title }) {
   if (!data || data.length === 0) {
     return <div className="chart-placeholder">No scatter data available</div>

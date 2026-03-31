@@ -70,6 +70,12 @@ class SessionLogger:
     # ── Session lifecycle ───────────────────────────────────────────────
 
     def _handle_session_started(self, data: Dict) -> None:
+        """Create a new session record when the detector emits ``session_started``.
+
+        Extracts ``language``, ``project_name``, ``file_path``, and
+        ``timestamp`` from *data*, persists them via the database manager, and
+        resets per-session state.
+        """
         file_path = data.get("file_path", "")
         language = data.get("language") or extract_language(file_path)
         project_name = data.get("project_name")
@@ -87,6 +93,13 @@ class SessionLogger:
         logger.info("Session started: %s (%s)", session_id[:8], language)
 
     def _handle_interaction_detected(self, data: Dict) -> None:
+        """Persist a new interaction and its derived metrics/errors.
+
+        Computes the interaction type (new_code/refactor/bugfix/explanation),
+        estimates token usage if not provided by the reader, records the
+        interaction row, then conditionally runs static-analysis metrics for
+        Python/JS/TS responses and scans for error patterns.
+        """
         if self._current_session_id is None:
             logger.warning("Interaction detected but no active session.")
             return
@@ -148,6 +161,12 @@ class SessionLogger:
             logger.debug("Logged %d error(s) for interaction seq=%d", len(errors), seq)
 
     def _handle_session_ended(self, data: Dict) -> None:
+        """Finalise the current session when the detector emits ``session_ended``.
+
+        Calculates the final acceptance rate from the stored interactions,
+        determines the status (``"abandoned"`` for timeouts, ``"completed"``
+        otherwise), persists the end time, and clears per-session state.
+        """
         if self._current_session_id is None:
             return
 
@@ -175,11 +194,21 @@ class SessionLogger:
     # ── Helpers ─────────────────────────────────────────────────────────
 
     def _detect_modification(self, claude_response: str) -> bool:
+        """Return True if *claude_response* differs from the previous response.
+
+        The first interaction in a session is always considered unmodified
+        (``False``) because there is nothing to compare against.
+        """
         if self._previous_response is None:
             return False
         return claude_response != self._previous_response
 
     def _calculate_acceptance_rate(self) -> float:
+        """Calculate the fraction of accepted interactions in the current session.
+
+        Returns 0.0 if there is no active session or no interactions have been
+        recorded yet.
+        """
         if self._current_session_id is None:
             return 0.0
         interactions = self._db.get_session_interactions(self._current_session_id)

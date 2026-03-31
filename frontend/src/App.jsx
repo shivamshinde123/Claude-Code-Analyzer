@@ -6,6 +6,16 @@ import Sessions from './pages/Sessions'
 import SessionDetail from './pages/SessionDetail'
 import ErrorBoundary from './components/ErrorBoundary'
 
+/**
+ * Root application component.
+ *
+ * Sets up client-side routing with a top navigation bar that links to the
+ * Dashboard and Sessions pages.  All routes are wrapped in an ErrorBoundary
+ * so uncaught render errors display a friendly fallback instead of a blank
+ * screen.
+ *
+ * @returns {JSX.Element} The full application shell.
+ */
 function App() {
   return (
     <Router>

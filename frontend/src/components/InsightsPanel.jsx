@@ -1,6 +1,21 @@
 import React from 'react'
 import { TrendingUp, TrendingDown, AlertTriangle, CheckCircle, Zap, Code } from 'lucide-react'
 
+/**
+ * Panel that derives and displays key insights from the current metrics.
+ *
+ * Generates up to five insight cards covering:
+ * - The language with the highest acceptance rate
+ * - The most frequently occurring error type
+ * - The error recovery rate
+ * - The overall code-quality trend (improving / stable / declining)
+ * - The average number of interactions per session
+ *
+ * Renders a "no data" placeholder when there are not enough metrics yet.
+ *
+ * @param {{ metrics: object|null, sessions: object[] }} props
+ * @returns {JSX.Element}
+ */
 function InsightsPanel({ metrics, sessions }) {
   const insights = []
 

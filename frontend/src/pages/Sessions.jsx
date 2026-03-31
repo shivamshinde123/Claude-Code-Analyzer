@@ -2,14 +2,29 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useSessions } from '../hooks/useSessions'
 
+/** Stable empty filters object so the hook dependency array never changes. */
 const EMPTY_FILTERS = {}
 
+/**
+ * Sessions list page.
+ *
+ * Fetches all sessions without filters, renders them in a sortable table,
+ * and links each row to the SessionDetail page.
+ *
+ * @returns {JSX.Element}
+ */
 function Sessions() {
   const [sortBy, setSortBy] = useState('start_time')
   const [sortOrder, setSortOrder] = useState('desc')
 
   const { sessions, loading, error } = useSessions(EMPTY_FILTERS)
 
+  /**
+   * Toggle sort direction when the same column is clicked again;
+   * otherwise switch to ascending order on the new column.
+   *
+   * @param {string} column - The session object key to sort by.
+   */
   const handleSort = (column) => {
     if (sortBy === column) {
       setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
@@ -33,17 +48,20 @@ function Sessions() {
     return sortOrder === 'asc' ? aVal - bVal : bVal - aVal
   })
 
+  /** Format a duration in seconds to a human-readable string. */
   const formatDuration = (seconds) => {
     if (seconds == null) return '-'
     if (seconds < 60) return `${seconds}s`
     return `${(seconds / 60).toFixed(1)} min`
   }
 
+  /** Format a 0-1 acceptance rate as a percentage string. */
   const formatRate = (rate) => {
     if (rate == null) return '-'
     return `${(rate * 100).toFixed(1)}%`
   }
 
+  /** Renders an up/down arrow next to the currently sorted column header. */
   const SortIcon = ({ column }) => {
     if (sortBy !== column) return null
     return <span className="sort-icon">{sortOrder === 'asc' ? ' \u2191' : ' \u2193'}</span>

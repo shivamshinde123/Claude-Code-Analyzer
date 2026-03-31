@@ -4,6 +4,18 @@ import { ArrowLeft } from 'lucide-react'
 import { apiClient } from '../api/client'
 import Timeline from '../components/Charts/Timeline'
 
+/**
+ * Session detail page.
+ *
+ * Fetches full session data (metadata, interactions, errors) and the
+ * per-interaction timeline in parallel, then renders a metadata grid, an
+ * optional quality-score chart, a scrollable interaction list, and an error
+ * panel.
+ *
+ * The `sessionId` param is read from the URL via `useParams`.
+ *
+ * @returns {JSX.Element}
+ */
 function SessionDetail() {
   const { sessionId } = useParams()
   const [data, setData] = useState(null)

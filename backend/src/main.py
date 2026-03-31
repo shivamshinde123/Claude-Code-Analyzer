@@ -47,6 +47,11 @@ timeline.init_query_manager(qm)
 # Health check
 @app.get("/health")
 async def health():
+    """Return a simple liveness probe response.
+
+    Used by load balancers and container orchestrators to confirm the service
+    is up and accepting requests.
+    """
     return {"status": "ok"}
 
 

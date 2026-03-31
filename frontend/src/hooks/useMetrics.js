@@ -1,6 +1,19 @@
 import { useState, useEffect } from 'react'
 import { apiClient } from '../api/client'
 
+/**
+ * Custom hook that fetches all metrics data in parallel.
+ *
+ * Sends three concurrent requests to `/api/metrics/acceptance`,
+ * `/api/metrics/errors`, and `/api/metrics/quality`, then merges the results
+ * into a single `metrics` object.  The fetch is automatically re-triggered
+ * when `filters.language` or `filters.timePeriod` changes.  Any in-flight
+ * request is aborted via `AbortController` when the component unmounts or
+ * filters change, preventing stale-state updates.
+ *
+ * @param {{ language?: string, timePeriod?: string }} filters - Active filter values.
+ * @returns {{ metrics: object|null, loading: boolean, error: string|null }}
+ */
 export function useMetrics(filters) {
   const [metrics, setMetrics] = useState(null)
   const [loading, setLoading] = useState(false)

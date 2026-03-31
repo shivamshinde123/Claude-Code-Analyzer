@@ -1,5 +1,15 @@
 import React, { useState } from 'react'
 
+/**
+ * Date-range picker that exposes a start/end date pair to the parent.
+ *
+ * Renders two `<input type="date">` fields and Apply / Clear action buttons.
+ * Calls `onDateChange(startDate, endDate)` when the user clicks Apply, and
+ * `onDateChange(null, null)` when they click Clear.
+ *
+ * @param {{ onDateChange: (start: string|null, end: string|null) => void }} props
+ * @returns {JSX.Element}
+ */
 function DateRange({ onDateChange }) {
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')

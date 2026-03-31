@@ -1,6 +1,17 @@
 import React, { useState, useEffect } from 'react'
 import { apiClient } from '../../api/client'
 
+/**
+ * Language dropdown filter.
+ *
+ * Fetches the list of available languages from `/api/sessions/stats/summary`
+ * on mount and populates a `<select>` element.  Calls `onLanguageChange`
+ * with the selected language string, or `null` when "All Languages" is
+ * chosen.
+ *
+ * @param {{ onLanguageChange: (language: string|null) => void }} props
+ * @returns {JSX.Element}
+ */
 function LanguageFilter({ onLanguageChange }) {
   const [languages, setLanguages] = useState([])
   const [selected, setSelected] = useState('')

@@ -1,6 +1,23 @@
 import { useState, useEffect } from 'react'
 import { apiClient } from '../api/client'
 
+/**
+ * Custom hook that fetches a paginated, filtered list of sessions.
+ *
+ * Sends a request to `/api/sessions` whenever any of the filter values
+ * change.  The in-flight request is cancelled via `AbortController` on
+ * cleanup to prevent stale state updates.
+ *
+ * @param {{
+ *   language?: string,
+ *   status?: string,
+ *   startDate?: string,
+ *   endDate?: string,
+ *   limit?: number,
+ *   offset?: number
+ * }} filters - Query parameters forwarded to the API.
+ * @returns {{ sessions: object[], totalCount: number, loading: boolean, error: string|null }}
+ */
 export function useSessions(filters) {
   const [sessions, setSessions] = useState([])
   const [totalCount, setTotalCount] = useState(0)

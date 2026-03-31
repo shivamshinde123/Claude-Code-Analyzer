@@ -1,11 +1,27 @@
 import Plot from "react-plotly.js"
 
+/**
+ * Read a CSS custom property value from the document root.
+ *
+ * @param {string} name    - CSS variable name, e.g. `'--accent'`.
+ * @param {string} fallback - Value returned when the variable is undefined or
+ *                            the code runs outside a browser (e.g. SSR).
+ * @returns {string}
+ */
 function themeColor(name, fallback) {
   if (typeof window === 'undefined') return fallback
   const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim()
   return v || fallback
 }
 
+/**
+ * Convert a hex colour string to an rgba() string with the given opacity.
+ * Supports 3-character shorthand hex values.
+ *
+ * @param {string} hex   - Hex colour (e.g. `'#C084FC'` or `'#C8F'`).
+ * @param {number} alpha - Opacity between 0 and 1 (default 0.15).
+ * @returns {string} CSS rgba() colour string.
+ */
 function hexToRgba(hex, alpha = 0.15) {
   try {
     const m = hex.replace('#', '')
@@ -20,6 +36,17 @@ function hexToRgba(hex, alpha = 0.15) {
   }
 }
 
+/**
+ * Line chart that renders a time-series of values using Plotly.
+ *
+ * Each data point must have a `timestamp` (or `date`) key and a `value`
+ * (or `acceptance_rate` / `rate`) key.  The chart fills the area below the
+ * line using a translucent version of the accent colour pulled from the CSS
+ * theme.
+ *
+ * @param {{ data: object[], title: string, yLabel: string }} props
+ * @returns {JSX.Element}
+ */
 function Timeline({ data, title, yLabel }) {
   if (!data || data.length === 0) {
     return <div className="chart-placeholder">No timeline data available</div>
